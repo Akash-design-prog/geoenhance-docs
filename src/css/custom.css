@@ -1,7 +1,11 @@
 /**
- * GeoEnhance-AI docs theme -- matches the live dashboard's palette
- * (#0a0e17 background, #00d4ff cyan accent) so the docs and the product
- * feel like one thing, not a slideshow bolted onto a different-looking app.
+ * GeoEnhance-AI docs theme. Light mode keeps the dashboard's teal identity as-is.
+ * Dark mode is deliberately softened from the dashboard's own neon #00d4ff: that
+ * color is fine as a small accent on the live product's UI chrome, but spread
+ * across a whole page of body text and links on a near-black background it reads
+ * as glaring, not sharp. Same hue family (cyan-teal, so the two still feel related),
+ * lower saturation, and the background lifted off true black -- both are standard
+ * fixes for exactly this kind of dark-mode eye strain.
  */
 
 :root {
@@ -13,26 +17,38 @@
   --ifm-color-primary-lighter: #0ba8c4;
   --ifm-color-primary-lightest: #10bdd8;
   --ifm-code-font-size: 92%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 212, 255, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(8, 145, 168, 0.1);
+
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family: 'Fraunces', Georgia, serif;
+  --ifm-heading-font-weight: 600;
+  --card-shadow: 0 1px 2px rgba(16, 20, 29, 0.04), 0 4px 16px rgba(16, 20, 29, 0.06);
+  --card-shadow-hover: 0 2px 4px rgba(16, 20, 29, 0.06), 0 8px 24px rgba(16, 20, 29, 0.1);
 }
 
 [data-theme='dark'] {
-  --ifm-color-primary: #00d4ff;
-  --ifm-color-primary-dark: #00bfe6;
-  --ifm-color-primary-darker: #00b3d9;
-  --ifm-color-primary-darkest: #0093b3;
-  --ifm-color-primary-light: #1ad8ff;
-  --ifm-color-primary-lighter: #33dbff;
-  --ifm-color-primary-lightest: #66e5ff;
-  --ifm-background-color: #0a0e17;
-  --ifm-background-surface-color: #0d1120;
-  --ifm-navbar-background-color: #0a0e17;
-  --ifm-footer-background-color: #080b13;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 212, 255, 0.12);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.24);
+  --card-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.28), 0 10px 28px rgba(0, 0, 0, 0.32);
+  --ifm-color-primary: #4cc9e0;
+  --ifm-color-primary-dark: #3ab9d1;
+  --ifm-color-primary-darker: #35aec5;
+  --ifm-color-primary-darkest: #2b90a3;
+  --ifm-color-primary-light: #63d2e5;
+  --ifm-color-primary-lighter: #78d9e9;
+  --ifm-color-primary-lightest: #a3e6f0;
+  --ifm-background-color: #10141d;
+  --ifm-background-surface-color: #151a25;
+  --ifm-navbar-background-color: #10141d;
+  --ifm-footer-background-color: #0d1119;
+  --docusaurus-highlighted-code-line-bg: rgba(76, 201, 224, 0.1);
 }
 
 .hero--dark {
-  --ifm-hero-background-color: #0a0e17;
+  --ifm-hero-background-color: #10141d;
+}
+
+h1, h2, h3, .hero__title {
+  text-wrap: balance;
 }
 
 table {
@@ -42,5 +58,5 @@ table {
 
 .markdown img {
   border-radius: 8px;
-  border: 1px solid rgba(0, 212, 255, 0.15);
+  border: 1px solid rgba(76, 201, 224, 0.15);
 }

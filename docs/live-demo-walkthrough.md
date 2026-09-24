@@ -10,11 +10,6 @@ sidebar_position: 4
 Five sectors, each running the real pipeline against real Copernicus tiles on their native UTM grid, plus a live
 upload path that runs the same audited pipeline on-demand.
 
-{/*
-GIF placeholders -- replace each with a short (5-10s) screen capture of the real dashboard, sped up if it covers a
-wait (e.g. live inference). See the project's recording notes for how these were captured.
-*/}
-
 ## Agriculture
 
 ![Agriculture before/after](./img/agriculture.gif)
@@ -52,15 +47,26 @@ NDVI. Canopy-level detail for a use case where the input resolution most directl
 
 ## Interface controls, across every sector
 
-- **Show AI Confidence** -- toggles the uncertainty overlay, with a picker for RGB / NIR / Spectral / Index views (the
-  last labelled NDVI, NDWI, or NDBI to match the sector).
-- **Mark least-trusted pixels** -- an amber-striped overlay of the bottom N% most-distrusted pixels in the tile, with
-  a percentage slider.
-- **Natural / Enhanced contrast** -- a display-only toggle (percentile stretch vs. local-contrast CLAHE); it never
-  changes the underlying data, so nothing looks more edited than it is.
-- **Magnifier** -- twin hover lenses: the raw 10 m input on the left, drawn as true pixels (nearest-neighbour, with a
-  faint grid once one source pixel spans enough screen pixels to show it honestly), and the AI output on the right,
-  both centred on the same point.
+**Show AI Confidence** toggles the uncertainty overlay, with a picker for RGB / NIR / Spectral / Index views (the
+last labelled NDVI, NDWI, or NDBI to match the sector).
+
+![Cycling the confidence view through RGB, NIR, Spectral, and the sector's own index](./img/confidence.gif)
+
+**Mark least-trusted pixels** overlays the bottom N% most-distrusted pixels in the tile with an amber stripe, driven
+by a percentage slider.
+
+![Stepping the least-trusted-pixels percentage slider](./img/trust.gif)
+
+**Magnifier** shows twin hover lenses: the raw 10 m input on the left, drawn as true pixels (nearest-neighbour, with
+a faint grid once one source pixel spans enough screen pixels to show it honestly), and the AI output on the right,
+both centred on the same point.
+
+![The magnifier's twin lenses following the cursor across the tile](./img/magnifier.gif)
+
+**Natural / Enhanced contrast** is a display-only toggle (percentile stretch vs. local-contrast CLAHE); it never
+changes the underlying data, so nothing looks more edited than it is.
+
+![Switching between Natural and Enhanced contrast rendering](./img/render-mode.gif)
 
 ## Try it yourself: live upload
 

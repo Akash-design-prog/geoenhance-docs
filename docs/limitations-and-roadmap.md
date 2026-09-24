@@ -76,3 +76,6 @@ stub.
   carries a fix for non-square tiles; full provenance is in `ml/vendor/README.md`.
 - Imagery: contains modified Copernicus Sentinel data, obtained through the Copernicus Browser.
 - Model distribution and loading: `mlstac` and the TACO Foundation model hub.
+- Validation references (see [Validation & Results](/validation-results)): SEN2NEON (Hugging Face
+  `isp-uv-es/SEN2NEON`, CC-BY-4.0); SEN2VENuS v2 (Zenodo record 14603764 -- CC-BY-NC-4.0 for the 5m reference
+  imagery, Etalab 2.0 for its Sentinel-2 portion); ESA OpenSR's `opensr-test` benchmark suite.

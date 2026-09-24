@@ -4,22 +4,31 @@
  */
 
 .heroBanner {
-  padding: 4rem 0;
+  padding: 5rem 0 4rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.16) 0, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(0, 0, 0, 0.08) 0, transparent 50%),
+    linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.08) 1px,
+      transparent 1px
+    );
+  background-size: auto, auto, 44px 44px;
 }
 
 @media screen and (max-width: 996px) {
   .heroBanner {
-    padding: 2rem;
+    padding: 2.5rem 1.5rem;
   }
 }
 
 .heroSub {
   max-width: 640px;
-  margin: 0 auto 1.5rem;
-  opacity: 0.9;
+  margin: 0 auto 1.75rem;
+  opacity: 0.92;
 }
 
 .buttons {
@@ -31,5 +40,37 @@
 }
 
 .ctaButton {
-  border: 2px solid var(--ifm-color-emphasis-900);
+  background: var(--ifm-color-emphasis-0);
+  color: var(--ifm-color-primary-darkest);
+  border: none;
+  box-shadow: 0 2px 4px rgba(16, 20, 29, 0.12), 0 8px 20px rgba(16, 20, 29, 0.16);
+}
+
+/* Infima's own base .button:hover rule resets text color to a theme-derived value regardless of
+   which button variant is used, and that rule's position in the bundle isn't something this file
+   controls -- doubling the class selector (zero visual effect, pure specificity boost) guarantees
+   these hover colors win outright instead of depending on cascade order. */
+.ctaButton.ctaButton:hover {
+  color: var(--ifm-color-primary-darkest);
+  transform: translateY(-1px);
+}
+
+.ghostButton {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ghostButton.ghostButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #fff;
+  color: #fff;
+}
+
+.ghostButton svg {
+  width: 18px;
+  height: 18px;
 }

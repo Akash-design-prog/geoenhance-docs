@@ -13,6 +13,10 @@ const config: Config = {
 
   url: 'https://akash-design-prog.github.io',
   baseUrl: '/geoenhance-docs/',
+  // Explicit, not left as Docusaurus's "host default" (undefined) -- the search-local plugin
+  // matches built page routes against known doc permalinks, and that match is keyed off this
+  // value. Leaving it unset is the suspected reason its indexer silently matched zero pages.
+  trailingSlash: false,
 
   organizationName: 'Akash-design-prog',
   projectName: 'geoenhance-docs',
@@ -34,6 +38,15 @@ const config: Config = {
     locales: ['en'],
   },
 
+  // Fraunces for headings (matches the live dashboard's own hero typeface), Inter for body --
+  // real typography instead of the Infima default system stack.
+  stylesheets: [
+    {
+      href: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap',
+      type: 'text/css',
+    },
+  ],
+
   presets: [
     [
       'classic',
@@ -51,6 +64,23 @@ const config: Config = {
     ],
   ],
 
+  // Local, index-at-build-time search -- no Algolia account or external service needed.
+  // Needs the [resolve, options] tuple form -- a bare string silently skips index generation.
+  themes: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,
+        indexBlog: false,
+        // The plugin defaults to assuming docs live under /docs/* -- ours live at the site
+        // root (docs preset routeBasePath: '/'), so every route silently matched zero indexed
+        // pages until this was set explicitly. Root basePath is passed as '' per the plugin's
+        // own handling (see processPluginOptions.js: it strips a leading '/' either way).
+        docsRouteBasePath: '/',
+      },
+    ],
+  ],
+
   themeConfig: {
     colorMode: {
       defaultMode: 'dark',
@@ -58,10 +88,6 @@ const config: Config = {
     },
     navbar: {
       title: 'GeoEnhance-AI',
-      logo: {
-        alt: 'GeoEnhance-AI logo',
-        src: 'img/logo.svg',
-      },
       items: [
         {
           type: 'docSidebar',
