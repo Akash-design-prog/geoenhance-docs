@@ -91,7 +91,7 @@ ml/
   inference_server.py     Tier 3: local live-upload server (needs torch)
   conformal.py             split-conformal calibration of the confidence layer
   vendor/sen2sr/           patched copy of ESA SEN2SR (CC0) -- see vendor/README.md
-  tests/                   195+ automated tests (model stubbed for the fast ones)
+  tests/                   197 automated tests (model stubbed for the fast ones; 220 total with backend/tests/)
 frontend/           React 19 + Vite + Tailwind CSS v4 dashboard
 data/
   raw_tiles/{sector}/      input band TIFFs            (not tracked)

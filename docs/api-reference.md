@@ -32,6 +32,24 @@ Every response carries:
 | `trust_rank_image_url` | The per-pixel trust-rank layer, or `null` if it wasn't generated (e.g. a live upload with no TTA) |
 | `change` | The disaster change layer + summary, or `null` for every other sector |
 
+## `GET /pixel-spectrum/{usecase}`
+
+Real per-band reflectance at one clicked pixel -- for both the raw input and the AI output -- read straight from the
+full-precision `.npy` arrays the pipeline saves in `raw_data/` (never derived from the lossy 8-bit display images).
+Backs the dashboard's click-to-inspect spectral profile toggle.
+
+Query params: `x`, `y` (required, in OUTPUT/2.5 m pixel coordinates -- the same frame the slider images are
+displayed in) and `phase` (optional, `disaster` only). The matching input pixel is `x // 4, y // 4`, since every
+shipped tile is a plain 4x upsample with no additional crop offset between the saved input and output arrays.
+
+Returns `usecase`, `phase`, `bands` (the 10-band order), `input_pixel`/`output_pixel` coordinates, and
+`input_reflectance`/`output_reflectance` -- one real value per band, at that exact pixel, for each.
+
+**Guardrails:** unknown `usecase` or an invalid `phase` for a non-phased sector -- 404. `(x, y)` outside the tile's
+real bounds -- 400, not a crash. Missing `raw_data/` arrays (a sector whose pipeline hasn't been run, or has been
+run without the input backfill) -- a clean 404, since there's no "meta.json skeleton" equivalent for a per-pixel
+feature: a sector with no real pipeline run genuinely has nothing to return.
+
 ## `POST /enhance`
 
 Accepts a live upload -- a `.zip` of the 10 Sentinel-2 band GeoTIFFs -- plus a required `usecase` field naming which

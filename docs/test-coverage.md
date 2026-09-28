@@ -7,7 +7,7 @@ sidebar_position: 10
 
 # Test Coverage
 
-213 test functions across 22 files -- 195 in `ml/tests/`, 18 in `backend/tests/`. This page says what each file
+220 test functions across 23 files -- 197 in `ml/tests/`, 23 in `backend/tests/`. This page says what each file
 actually checks, and where the boundary is between "verified" and "assumed." `.github/workflows/ci.yml` runs the
 full ML suite, the backend suite, and the frontend type check/build on every push.
 
@@ -48,7 +48,7 @@ independently-computed reference on every run.
 | `test_pipeline.py` | 41 | Core pipeline plumbing and numerics: routing, scaling guards, streaming statistics, percentile scaling, image formats, JSON validity, metadata fields, model-download caching, no-data trimming, the reflectance regression test above. |
 | `test_finetune.py` | 22 | Fine-tuning data helpers (pure numpy) and the loss/training loop (needs torch, structural stand-in network). |
 | `test_change_analysis.py` | 15 | The disaster change-detection module against synthetic scenes (a field that turns to bare ground, plus cloud/snow/noise) with every expected value known in advance. |
-| `test_sr_metrics.py` | 16 | PSNR/SSIM/SAM and friends -- pure numpy, checked against exact constants, mathematical identities, or a slow brute-force reference. |
+| `test_sr_metrics.py` | 18 | PSNR/SSIM/SAM and friends -- pure numpy, checked against exact constants, mathematical identities, or a slow brute-force reference. Includes the PSF-based consistency check (see [ML Pipeline Internals](/ml-pipeline-internals)): its Gaussian-sigma-for-MTF solver is checked against a brute-force DFT of the actual discrete kernel, and the consistency error itself against a genuine self-consistent round-trip pair, not a box-filter stand-in. |
 | `test_eval_sen2neon.py` | 14 | The SEN2NEON evaluation harness against synthetic tiles and fake scoring functions; the real file-loader path needs rasterio and is skipped without it. |
 | `test_geotiff_export.py` | 11 | Georeferenced export coordinates, hand-derived from the input grid, trim, and crop. |
 | `test_uncertainty_eval.py` | 12 | Uncertainty-ranking metrics against constructed cases with a known correct ranking. |
@@ -67,7 +67,7 @@ independently-computed reference on every run.
 | `test_border_pad.py` | 2 | See above. |
 | `test_opensr_eval_sets.py` | 2 | Grid handling for the official ESA benchmark scorer. |
 | `test_dump_outputs.py` | 2 | Output-dumping utility. |
-| `backend/tests/test_api.py` | 18 | Starts the real backend with `uvicorn` against a temporary tiles folder and queries it over real HTTP -- routing, both sectors' phase switch, the change layer, `/enhance`'s validation/proxying/concurrency lock (a real thread-level concurrency test, not mocked), and that a real inference-server error is relayed rather than replaced with a generic failure. |
+| `backend/tests/test_api.py` | 23 | Starts the real backend with `uvicorn` against a temporary tiles folder and queries it over real HTTP -- routing, both sectors' phase switch, the change layer, `/enhance`'s validation/proxying/concurrency lock (a real thread-level concurrency test, not mocked), that a real inference-server error is relayed rather than replaced with a generic failure, and `/pixel-spectrum/{usecase}`'s real per-pixel reflectance lookup (scaled-coordinate reads, the disaster `phase=pre` prefix switch, out-of-bounds as a clean 400, missing arrays as a clean 404, and unknown usecase/phase combinations rejected). |
 
 ## What this doesn't cover
 

@@ -42,6 +42,15 @@ mathematically the same operation on different bands; keeping that generic and d
 forest, and defence are never accidentally scored with the wrong index -- the table is the single place that
 mapping can go wrong, and it's the one place it's checked.
 
+## MNDWI: a second water index for disaster, alongside NDWI
+
+Disaster's default index is NDWI (Green/NIR), but the pipeline also computes **MNDWI** -- `(Green - SWIR1) / (Green
++ SWIR1)`, using bands B03 and B11 (Xu, 2006) -- for both the input and the SR output, saved as
+`index_mndwi_before`/`index_mndwi_after` in `meta.json`. It reuses the same generic `compute_spectral_index` function
+as every other index above, just with a different band pair. MNDWI is generally more robust than NDWI against
+built-up-area false positives in flood mapping (SWIR1 responds less to urban surfaces than NIR does), so having both
+numbers side by side is a genuine second check on the same water-extent claim, not a cosmetic addition.
+
 ## Model loading and caching
 
 ```python
@@ -112,3 +121,65 @@ final images themselves would still be ~65 megapixel PNGs no browser slider hand
 center-crops to a 512x512 window by default; `ROI_SIZE=1024` or `ROI_SIZE=0` (full scene) are available as
 environment overrides for anyone running the pipeline directly, and the applied crop is always recorded in
 `meta.json` under `roi` so it's never silently different from what a reader assumes.
+
+## The PSF-based consistency check: a fairer self-consistency test
+
+`consistency_error_pct` (block-averaging the SR output back down and comparing to the real input) implicitly assumes
+the sensor's footprint is a perfectly sharp box -- average exactly 4x4 SR pixels, compare to 1 input pixel, done. A
+real optical system doesn't work that way: its point-spread function rolls off smoothly, so a real 10 m pixel
+actually blends in a bit of its neighbours' signal too. Treating the footprint as a sharp box understates that
+blending, and can make a genuinely-consistent output look slightly worse than it really is.
+
+`consistency_error_psf_pct` (`ml/sr_metrics.py`) fixes this by blurring the SR output with a Gaussian matched to
+Sentinel-2's real MTF at Nyquist (`mtf_nyquist=0.3`, a commonly-used approximation for the 10 m VNIR bands) *before*
+block-averaging. The Gaussian's sigma comes from a closed-form solution of the Gaussian-MTF Fourier pair
+(`gaussian_sigma_for_mtf`), verified numerically -- not just algebraically -- against a brute-force DFT of the
+actual discrete kernel, exact to 1e-4 in `test_sr_metrics.py`. Falls back to the plain box result if `opencv` isn't
+installed, rather than failing an otherwise-optional check.
+
+## Runtime and memory: CPU vs GPU
+
+Every number below was actually measured, not estimated -- each is annotated with the hardware it ran on so nothing
+here is compared apples-to-oranges.
+
+| | CPU (2-core i3 laptop) | GPU (Kaggle T4) |
+|---|---|---|
+| Single pass, small tile (221x161) | ~24-30 s (9 overlapping 128px patches, ~2.7 s/patch) | not separately measured -- TTA row below covers it |
+| 8-pass TTA, small tile | 208-337 s (±60% run-to-run noise measured across two runs on this machine) | -- |
+| 8-pass TTA, production 512x512 default (Nilgiris) | 1,291 s total, ~157 s/pass, ~6.3 s/patch (~2.3x slower per patch than the small tile -- likely sustained-load thermal throttling, not a shape effect) | -- |
+| Peak RAM, one sector | ~1.1 GB (small tile) / ~1.5 GB (512x512 default) | not separately profiled |
+| All 5 sectors, 8-pass TTA each | ~1.5-2 h | ~7 min 21 s for the equivalent TTA-calibration job (measured directly on a real Kaggle run) -- roughly a 12-16x speedup, consistent with the ~12x figure used to size the live-upload path's GPU-auto-detect timeout |
+| SEN2SR (full/larger model) vs SEN2SR Lite, same pass | -- (full model needs `mamba-ssm`, CUDA-only, cannot run on this CPU at all) | ~50x slower per pass than Lite on the same GPU hardware -- this alone is why the larger model can only ever ship as an optional mode, never the default |
+
+**What this is not**: a formal benchmark suite run under controlled, repeated conditions -- these are real measurements
+taken during actual development and Kaggle runs, kept here because they're the only runtime numbers that exist, not
+because they're lab-clean. The ±60% run-to-run noise on the small-tile TTA figure is reported as measured, not
+smoothed over. `SR_MODEL=SEN2SR` (the larger model) is wired into `load_model()` as an environment override for
+anyone with GPU access to try; a full accuracy comparison against Lite across all validation sets was designed
+(`ml/colab_fullmodel.ipynb`, with the adoption rule fixed before results: only ship it if it beats Lite on validation
+*and* test tiles *and* both Indian sites, and isn't worse on 3 of the 4 ESA sets) but, as of this page, has not yet
+been run to completion on real GPU hardware -- treat the larger model as available-but-unvalidated, not benchmarked.
+
+## ONNX export: attempted, does not currently work
+
+A CPU speed test was a real candidate for closing the gap between this pipeline's own CPU numbers and a
+production-style deployment. Attempted directly (`torch.onnx.export` against the loaded, compiled SEN2SR Lite model,
+a real 128x128x10 input) rather than assumed either way:
+
+- **Tracing itself succeeded past the model's own Fourier hard constraint** -- `aten::fft_fftn`, `fft_fftshift`,
+  `fft_ifftshift` and `fft_ifft2` all exported cleanly. This was the operation expected to be the blocker going in;
+  it wasn't.
+- **The real blocker is `aten::_upsample_bilinear2d_aa`** (antialiased bilinear upsampling, used by the hard
+  constraint's own bicubic-antialias reference resample), which has no ONNX equivalent at any opset version this
+  torch build supports (checked 18, 20, and 23 -- the newest available -- all fail identically).
+- The newer `torch.export`-based ("dynamo") exporter was also tried as a real alternative, since it sometimes
+  decomposes ops the legacy tracer can't. It did not fail outright, but did not complete in a reasonable time either
+  (extensive per-layer tracing warnings, no output file, no error) -- inconclusive, not a pass.
+
+**Net result: ONNX export does not currently work for this model**, for a specific, identified reason (not "it broke
+somewhere"), and CPU inference timing stays exactly the numbers in the table above -- no ONNX Runtime comparison
+exists because no exported model exists to run it on. A workaround exists in principle (patch the hard constraint
+to use a plain, non-antialiased resize when exporting, since the antialiasing only affects the reference the FFT
+constraint compares against, not the model's own learned weights) but was not attempted -- it would change the
+constraint's numerical behaviour in a way that needs its own accuracy check before trusting the exported model's
+output, which is beyond the scope of a speed test.

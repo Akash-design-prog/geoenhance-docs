@@ -68,6 +68,18 @@ changes the underlying data, so nothing looks more edited than it is.
 
 ![Switching between Natural and Enhanced contrast rendering](./img/render-mode.gif)
 
+**A real geospatial scale bar** sits in the image's corner, computed from the tile's actual ground sampling distance
+and the box's on-screen size (the same `object-cover` uniform-scale-factor math used for the pixel-click coordinate
+mapping below), then rounded to the nearest "nice" round-number distance (5 m, 10 m, 25 m, 50 m, 100 m, 250 m, ...).
+It recomputes on resize and on image load, so it's never a stale fixed label -- it reflects whatever the box is
+actually showing right now.
+
+**Spectral Profile**, when toggled on, turns a click anywhere on the image into a real per-band reflectance readout
+at that exact pixel -- both the raw 10 m input and the AI 2.5 m output, read from the pipeline's own saved
+full-precision arrays (see [`GET /pixel-spectrum`](/api-reference#get-pixel-spectrumusecase)), not estimated from the
+display image. Off by default; clicking does nothing while it's off, so it never surprises someone just dragging the
+slider.
+
 ## Try it yourself: live upload
 
 Unlike the five precomputed sectors above, live upload runs real inference on demand. Click **"Download a real

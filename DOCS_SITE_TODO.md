@@ -9,7 +9,9 @@ land or new ones come up.
       live-demo-walkthrough, trust-and-uncertainty, disaster-change-detection, api-reference,
       frontend-backend-engineering, test-coverage, development-journey, limitations-and-roadmap.
 - [x] Homepage: hero, results-at-a-glance stats, three "why" cards.
-- [x] Deployed live via GitHub Actions -> GitHub Pages.
+- [x] Deploy workflow exists and content is ready to deploy (moved to Tier B below -- this checkbox was marked
+      done prematurely; confirmed 2026-09-28 by navigating to the live URL directly, which 404s: "Site not
+      found · GitHub Pages"). The site has never actually gone live.
 - [x] Real dataset credits (SEN2NEON, SEN2VENuS v2, opensr-test) added to Licence and credits.
 - [x] 10 real GIFs captured via Playwright (5 sectors + confidence/magnifier/trust/render-mode/live-upload),
       agriculture and defence re-shot in Enhanced Contrast mode for visibility.
@@ -33,6 +35,10 @@ land or new ones come up.
 
 ## Tier B -- real, not yet done
 
+- [ ] Actually deploy: flip this repo public, then re-run the Pages workflow (or push a new commit) -- GitHub
+      Pages cannot deploy from a private repo on a free account, and flipping visibility alone does not
+      retroactively deploy anything already "succeeded" silently. Test the live link in an incognito window
+      right after.
 - [ ] Confirm `data/demo_tiles/agriculture_feb2026_backup/` in the main repo (the pre-swap agriculture tile) is
       intentionally being kept as a revert path, or clean it up once the July tile is confirmed final.
 
