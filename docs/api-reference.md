@@ -67,3 +67,17 @@ with their real message, not replaced by a generic failure.
 **Honest fields:** live results have no TTA by default on CPU, so `tta_passes: 1` and the confidence/trust fields are
 null, exactly as they'd be for any single-pass run. `psnr`/`ssim` stay null, same as every unvalidated sector -- a
 live upload has no reference to score against.
+
+## `GET /enhance/capabilities`
+
+Reports which mode the *next* `POST /enhance` call will actually run in on the currently-running Tier-3 inference
+server -- `live_tta` (bool), `live_roi_cap` (pixels, or `null`), and `device` (`"cpu"` or `"cuda"`). This is a
+snapshot of `ml/inference_server.py`'s own `LIVE_TTA`/`LIVE_ROI_CAP` environment variables (see
+[Architecture](/architecture)), which are fixed per-process, not per-request -- so one fetch per upload attempt is
+enough, no polling needed.
+
+Exists so the frontend's processing screen can show a caption that matches reality (e.g. "8-pass TTA" when the
+inference server was deliberately launched with `LIVE_TTA=1` to force the full ensemble even on CPU) instead of
+hardcoding the single-pass-CPU default as if it were the only possible outcome. Falls back to
+`{"live_tta": false, "live_roi_cap": null, "device": "unknown"}` if the inference server is unreachable, rather than
+failing the screen before an upload has even been attempted.
